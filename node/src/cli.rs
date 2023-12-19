@@ -7,6 +7,7 @@ pub struct Cli {
 
 	#[clap(flatten)]
 	pub run: RunCmd,
+<<<<<<< HEAD
 
 	/// Disable automatic hardware benchmarks.
 	///
@@ -24,6 +25,12 @@ pub struct Cli {
 }
 
 #[derive(Debug, clap::Subcommand)]
+=======
+}
+
+#[derive(Debug, clap::Subcommand)]
+#[allow(clippy::large_enum_variant)]
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 pub enum Subcommand {
 	/// Key management cli utilities
 	#[command(subcommand)]

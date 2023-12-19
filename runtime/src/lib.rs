@@ -6,6 +6,7 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
+<<<<<<< HEAD
 /// Constant values used within the runtime.
 pub mod constants;
 /// Generated voter bag information.
@@ -21,15 +22,25 @@ use frame_election_provider_support::{
 use frame_system::EnsureRoot;
 
 use sp_api::impl_runtime_apis;
+=======
+use pallet_grandpa::AuthorityId as GrandpaId;
+use sp_api::impl_runtime_apis;
+use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::{
 		AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, NumberFor, One, Verify,
+<<<<<<< HEAD
 		OpaqueKeys,
 	},
 	curve::PiecewiseLinear,
 	transaction_validity::{TransactionSource, TransactionValidity, TransactionPriority},
+=======
+	},
+	transaction_validity::{TransactionSource, TransactionValidity},
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 	ApplyExtrinsicResult, MultiSignature,
 };
 use sp_std::prelude::*;
@@ -37,6 +48,7 @@ use sp_std::prelude::*;
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 
+<<<<<<< HEAD
 use node_primitives::Moment;
 use constants::{currency::*, time::*};
 
@@ -51,6 +63,14 @@ pub use frame_support::{
 	traits::{
 		ConstU128, ConstU32, ConstU64, ConstU8, KeyOwnerProofSystem, Randomness, StorageInfo,
 		U128CurrencyToVote,
+=======
+// A few exports that help ease life for downstream crates.
+pub use frame_support::{
+	construct_runtime, parameter_types,
+	traits::{
+		ConstBool, ConstU128, ConstU32, ConstU64, ConstU8, KeyOwnerProofSystem, Randomness,
+		StorageInfo,
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 	},
 	weights::{
 		constants::{
@@ -85,11 +105,16 @@ pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::Account
 pub type Balance = u128;
 
 /// Index of a transaction in the chain.
+<<<<<<< HEAD
 pub type Index = u32;
+=======
+pub type Nonce = u32;
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 
 /// A hash of some data used by the chain.
 pub type Hash = sp_core::H256;
 
+<<<<<<< HEAD
 impl_opaque_keys! {
 	pub struct SessionKeys {
 		pub babe: Babe,
@@ -104,6 +129,32 @@ pub const BABE_GENESIS_EPOCH_CONFIG: sp_consensus_babe::BabeEpochConfiguration =
 		allowed_slots: sp_consensus_babe::AllowedSlots::PrimaryAndSecondaryPlainSlots,
 	};
 
+=======
+/// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
+/// the specifics of the runtime. They can then be made to be agnostic over specific formats
+/// of data like extrinsics, allowing for them to continue syncing the network through upgrades
+/// to even the core data structures.
+pub mod opaque {
+	use super::*;
+
+	pub use sp_runtime::OpaqueExtrinsic as UncheckedExtrinsic;
+
+	/// Opaque block header type.
+	pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
+	/// Opaque block type.
+	pub type Block = generic::Block<Header, UncheckedExtrinsic>;
+	/// Opaque block identifier type.
+	pub type BlockId = generic::BlockId<Block>;
+
+	impl_opaque_keys! {
+		pub struct SessionKeys {
+			pub aura: Aura,
+			pub grandpa: Grandpa,
+		}
+	}
+}
+
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 // To learn more about runtime versioning, see:
 // https://docs.substrate.io/main-docs/build/upgrade#runtime-versioning
 #[sp_version::runtime_version]
@@ -126,7 +177,11 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 /// This determines the average expected block time that we are targeting.
 /// Blocks will be produced at a minimum duration defined by `SLOT_DURATION`.
 /// `SLOT_DURATION` is picked up by `pallet_timestamp` which is in turn picked
+<<<<<<< HEAD
 /// up by `pallet_babe` to implement `fn slot_duration()`.
+=======
+/// up by `pallet_aura` to implement `fn slot_duration()`.
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 ///
 /// Change this to adjust the block time.
 pub const MILLISECS_PER_BLOCK: u64 = 6000;
@@ -152,12 +207,20 @@ parameter_types! {
 	pub const BlockHashCount: BlockNumber = 2400;
 	pub const Version: RuntimeVersion = VERSION;
 	/// We allow for 2 seconds of compute with a 6 second average block time.
+<<<<<<< HEAD
 	pub RuntimeBlockWeights: frame_system::limits::BlockWeights =
+=======
+	pub BlockWeights: frame_system::limits::BlockWeights =
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 		frame_system::limits::BlockWeights::with_sensible_defaults(
 			Weight::from_parts(2u64 * WEIGHT_REF_TIME_PER_SECOND, u64::MAX),
 			NORMAL_DISPATCH_RATIO,
 		);
+<<<<<<< HEAD
 	pub RuntimeBlockLength: frame_system::limits::BlockLength = frame_system::limits::BlockLength
+=======
+	pub BlockLength: frame_system::limits::BlockLength = frame_system::limits::BlockLength
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 		::max_with_normal_ratio(5 * 1024 * 1024, NORMAL_DISPATCH_RATIO);
 	pub const SS58Prefix: u8 = 42;
 }
@@ -167,26 +230,43 @@ parameter_types! {
 impl frame_system::Config for Runtime {
 	/// The basic call filter to use in dispatchable.
 	type BaseCallFilter = frame_support::traits::Everything;
+<<<<<<< HEAD
 	/// Block & extrinsics weights: base values and limits.
 	type BlockWeights = RuntimeBlockWeights;
 	/// The maximum length of a block (in bytes).
 	type BlockLength = RuntimeBlockLength;
+=======
+	/// The block type for the runtime.
+	type Block = Block;
+	/// Block & extrinsics weights: base values and limits.
+	type BlockWeights = BlockWeights;
+	/// The maximum length of a block (in bytes).
+	type BlockLength = BlockLength;
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 	/// The identifier used to distinguish between accounts.
 	type AccountId = AccountId;
 	/// The aggregated dispatch type that is available for extrinsics.
 	type RuntimeCall = RuntimeCall;
 	/// The lookup mechanism to get account ID from whatever is passed in dispatchers.
 	type Lookup = AccountIdLookup<AccountId, ()>;
+<<<<<<< HEAD
 	/// The index type for storing how many extrinsics an account has signed.
 	type Index = Index;
 	/// The index type for blocks.
 	type BlockNumber = BlockNumber;
+=======
+	/// The type for storing how many extrinsics an account has signed.
+	type Nonce = Nonce;
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 	/// The type for hashing blocks and tries.
 	type Hash = Hash;
 	/// The hashing algorithm used.
 	type Hashing = BlakeTwo256;
+<<<<<<< HEAD
 	/// The header type.
 	type Header = generic::Header<BlockNumber, BlakeTwo256>;
+=======
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 	/// The ubiquitous event type.
 	type RuntimeEvent = RuntimeEvent;
 	/// The ubiquitous origin type.
@@ -216,6 +296,7 @@ impl frame_system::Config for Runtime {
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
+<<<<<<< HEAD
 parameter_types! {
 	// NOTE: Currently it is not possible to change the epoch duration after the chain has started.
 	//       Attempting to do so will brick block production.
@@ -237,6 +318,13 @@ impl pallet_babe::Config for Runtime {
 		// TODO <Historical as KeyOwnerProofSystem<(KeyTypeId, pallet_babe::AuthorityId)>>::Proof;
 	type EquivocationReportSystem = ();
 		// TODO pallet_babe::EquivocationReportSystem<Self, Offences, Historical, ReportLongevity>;
+=======
+impl pallet_aura::Config for Runtime {
+	type AuthorityId = AuraId;
+	type DisabledValidators = ();
+	type MaxAuthorities = ConstU32<32>;
+	type AllowMultipleBlocksPerSlot = ConstBool<false>;
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 }
 
 impl pallet_grandpa::Config for Runtime {
@@ -253,7 +341,11 @@ impl pallet_grandpa::Config for Runtime {
 impl pallet_timestamp::Config for Runtime {
 	/// A timestamp: milliseconds since the unix epoch.
 	type Moment = u64;
+<<<<<<< HEAD
 	type OnTimestampSet = Babe;
+=======
+	type OnTimestampSet = Aura;
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 	type MinimumPeriod = ConstU64<{ SLOT_DURATION / 2 }>;
 	type WeightInfo = ();
 }
@@ -273,6 +365,25 @@ impl pallet_balances::Config for Runtime {
 	type ExistentialDeposit = ConstU128<EXISTENTIAL_DEPOSIT>;
 	type AccountStore = System;
 	type WeightInfo = pallet_balances::weights::SubstrateWeight<Runtime>;
+<<<<<<< HEAD
+=======
+	type FreezeIdentifier = ();
+	type MaxFreezes = ();
+	type RuntimeHoldReason = ();
+	type MaxHolds = ();
+}
+
+impl pallet_nicks::Config for Runtime {
+	type Currency = Balances;
+	type ReservationFee = ConstU128<100>;
+	type Slashed = ();
+	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+	type MinLength = ConstU32<8>;
+	type MaxLength = ConstU32<32>;
+	// type Event = Event;
+	type RuntimeEvent = RuntimeEvent;
+
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 }
 
 parameter_types! {
@@ -291,6 +402,7 @@ impl pallet_transaction_payment::Config for Runtime {
 impl pallet_sudo::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type RuntimeCall = RuntimeCall;
+<<<<<<< HEAD
 }
 
 parameter_types! {
@@ -549,15 +661,23 @@ impl pallet_staking::Config for Runtime {
 	type OnStakerSlash = (); // NominationPools
 	type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
 	type BenchmarkingConfig = StakingBenchmarkingConfig;
+=======
+	type WeightInfo = pallet_sudo::weights::SubstrateWeight<Runtime>;
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 }
 
 /// Configure the pallet-template in pallets/template.
 impl pallet_template::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
+<<<<<<< HEAD
+=======
+	type WeightInfo = pallet_template::weights::SubstrateWeight<Runtime>;
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
+<<<<<<< HEAD
 	pub struct Runtime
 	where
 		Block = Block,
@@ -577,6 +697,17 @@ construct_runtime!(
 		Session: pallet_session,
 		VoterList: pallet_bags_list::<Instance1>,
 		Historical: pallet_session::historical::{Pallet},
+=======
+	pub struct Runtime {
+		System: frame_system,
+		Timestamp: pallet_timestamp,
+		Aura: pallet_aura,
+		Grandpa: pallet_grandpa,
+		Balances: pallet_balances,
+		Nicks: pallet_nicks,
+		TransactionPayment: pallet_transaction_payment,
+		Sudo: pallet_sudo,
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template,
 	}
@@ -625,6 +756,10 @@ mod benches {
 		[frame_system, SystemBench::<Runtime>]
 		[pallet_balances, Balances]
 		[pallet_timestamp, Timestamp]
+<<<<<<< HEAD
+=======
+		[pallet_sudo, Sudo]
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 		[pallet_template, TemplateModule]
 	);
 }
@@ -648,6 +783,17 @@ impl_runtime_apis! {
 		fn metadata() -> OpaqueMetadata {
 			OpaqueMetadata::new(Runtime::metadata().into())
 		}
+<<<<<<< HEAD
+=======
+
+		fn metadata_at_version(version: u32) -> Option<OpaqueMetadata> {
+			Runtime::metadata_at_version(version)
+		}
+
+		fn metadata_versions() -> sp_std::vec::Vec<u32> {
+			Runtime::metadata_versions()
+		}
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 	}
 
 	impl sp_block_builder::BlockBuilder<Block> for Runtime {
@@ -687,6 +833,7 @@ impl_runtime_apis! {
 		}
 	}
 
+<<<<<<< HEAD
 	impl sp_consensus_babe::BabeApi<Block> for Runtime {
 		fn configuration() -> sp_consensus_babe::BabeConfiguration {
 			let epoch_config = Babe::epoch_config().unwrap_or(BABE_GENESIS_EPOCH_CONFIG);
@@ -733,18 +880,35 @@ impl_runtime_apis! {
 				equivocation_proof,
 				key_owner_proof,
 			)
+=======
+	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
+		fn slot_duration() -> sp_consensus_aura::SlotDuration {
+			sp_consensus_aura::SlotDuration::from_millis(Aura::slot_duration())
+		}
+
+		fn authorities() -> Vec<AuraId> {
+			Aura::authorities().into_inner()
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 		}
 	}
 
 	impl sp_session::SessionKeys<Block> for Runtime {
 		fn generate_session_keys(seed: Option<Vec<u8>>) -> Vec<u8> {
+<<<<<<< HEAD
 			SessionKeys::generate(seed)
+=======
+			opaque::SessionKeys::generate(seed)
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 		}
 
 		fn decode_session_keys(
 			encoded: Vec<u8>,
 		) -> Option<Vec<(Vec<u8>, KeyTypeId)>> {
+<<<<<<< HEAD
 			SessionKeys::decode_into_raw_public_keys(&encoded)
+=======
+			opaque::SessionKeys::decode_into_raw_public_keys(&encoded)
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 		}
 	}
 
@@ -778,8 +942,13 @@ impl_runtime_apis! {
 		}
 	}
 
+<<<<<<< HEAD
 	impl frame_system_rpc_runtime_api::AccountNonceApi<Block, AccountId, Index> for Runtime {
 		fn account_nonce(account: AccountId) -> Index {
+=======
+	impl frame_system_rpc_runtime_api::AccountNonceApi<Block, AccountId, Nonce> for Runtime {
+		fn account_nonce(account: AccountId) -> Nonce {
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 			System::account_nonce(account)
 		}
 	}
@@ -876,7 +1045,11 @@ impl_runtime_apis! {
 			// have a backtrace here. If any of the pre/post migration checks fail, we shall stop
 			// right here and right now.
 			let weight = Executive::try_runtime_upgrade(checks).unwrap();
+<<<<<<< HEAD
 			(weight, RuntimeBlockWeights::get().max_block)
+=======
+			(weight, BlockWeights::get().max_block)
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
 		}
 
 		fn execute_block(
@@ -891,6 +1064,7 @@ impl_runtime_apis! {
 		}
 	}
 }
+<<<<<<< HEAD
 
 #[cfg(test)]
 mod tests {
@@ -928,3 +1102,5 @@ mod tests {
 		);
 	}
 }
+=======
+>>>>>>> 9671047a89e4df39bd788c00a2961463d5feb263
