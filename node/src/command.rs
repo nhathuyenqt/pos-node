@@ -5,14 +5,14 @@ use crate::{
 	service,
 };
 use frame_benchmarking_cli::{BenchmarkCmd, ExtrinsicFactory, SUBSTRATE_REFERENCE_HARDWARE};
-use node_template_runtime::{Block, EXISTENTIAL_DEPOSIT};
+use node_potw_runtime::{Block, EXISTENTIAL_DEPOSIT};
 use sc_cli::{ChainSpec, RuntimeVersion, SubstrateCli};
 use sc_service::PartialComponents;
 use sp_keyring::Sr25519Keyring;
 
 #[cfg(feature = "try-runtime")]
 use {
-	node_template_runtime::constants::time::SLOT_DURATION,
+	node_potw_runtime::constants::time::SLOT_DURATION,
 	try_runtime_cli::block_building_info::substrate_info,
 };
 
@@ -50,9 +50,18 @@ impl SubstrateCli for Cli {
 		})
 	}
 
-	fn native_runtime_version(_: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
-		&node_template_runtime::VERSION
-	}
+	// fn native_runtime_version(_: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
+	// 	&node_potw_runtime::VERSION
+	// }
+	// fn load_spec(&self, id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {
+	// 	Ok(match id {
+	// 		"dev" => Box::new(chain_spec::development_config()?),
+	// 		"" | "local" => Box::new(chain_spec::local_testnet_config()?),
+	// 		"staging" => Box::new(chain_spec::staging_network_config()),
+	// 		path =>
+	// 			Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
+	// 	})
+	// }
 }
 
 /// Parse and run command line arguments
@@ -127,7 +136,8 @@ pub fn run() -> sc_cli::Result<()> {
 							)
 						}
 
-						cmd.run::<Block, service::ExecutorDispatch>(config)
+						// cmd.run::<Block, service::ExecutorDispatch>(config)
+						cmd.run::<Block, ()>(config)
 					},
 					BenchmarkCmd::Block(cmd) => {
 						let PartialComponents { client, .. } = service::new_partial(&config)?;

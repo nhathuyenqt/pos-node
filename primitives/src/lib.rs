@@ -1,5 +1,3 @@
-//! Low-level types used throughout the Substrate stencil code.
-
 #![warn(missing_docs)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
@@ -22,7 +20,8 @@ pub type BlockNumber = u32;
 pub type Balance = u128;
 
 /// Index of a transaction in the chain.
-pub type Index = u32;
+// pub type Index = u32;
+pub type Nonce = u32;
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
 pub type Signature = MultiSignature;
