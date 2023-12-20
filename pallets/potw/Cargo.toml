@@ -4,7 +4,6 @@ version = "4.0.0-dev"
 description = "FRAME pallet potw for defining custom runtime logic."
 homepage = "https://substrate.io"
 edition = "2021"
-license = "Nokia"
 publish = false
 repository = "https://github.com/substrate-developer-hub/substrate-node-potw/"
 
