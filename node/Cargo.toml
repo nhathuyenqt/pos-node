@@ -18,7 +18,7 @@ name = "node-potw"
 
 [dependencies]
 clap = { version = "4.0.9", features = ["derive"] }
-futures = { version = "0.3.21", features = ["thread-pool"]}
+futures = { version = "0.3.30", features = ["thread-pool"]}
 log = "0.4.17"
 rand = "0.8"
 
