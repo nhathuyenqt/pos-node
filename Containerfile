@@ -15,17 +15,17 @@ RUN apt-get update && \
 	useradd -m -u 1000 -U -s /bin/sh -d /polkadot polkadot && \
 	mkdir -p /data /polkadot/.local/share && \
 	chown -R polkadot:polkadot /data && \
-	ln -s /data /polkadot/.local/share/node-potw
+	ln -s /data /polkadot/.local/share/node-template
 
 USER polkadot
 
 # copy the compiled binary to the container
-COPY --chown=polkadot:polkadot --chmod=774 node-potw /usr/bin/node-potw
+COPY --chown=polkadot:polkadot --chmod=774 node-template /usr/bin/node-template
 
 # check if executable works in this container
-RUN /usr/bin/node-potw --version
+RUN /usr/bin/node-template --version
 
 # ws_port
 EXPOSE 9930 9333 9944 30333 30334
 
-CMD ["/usr/bin/node-potw"]
+CMD ["/usr/bin/node-template"]

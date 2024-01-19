@@ -1,7 +1,7 @@
 [workspace]
 members = [
     "node",
-    "pallets/potw",
+    "pallets/template",
     "runtime",
 ]
 [profile.release]

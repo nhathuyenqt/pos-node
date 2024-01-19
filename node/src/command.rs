@@ -5,16 +5,13 @@ use crate::{
 	service,
 };
 use frame_benchmarking_cli::{BenchmarkCmd, ExtrinsicFactory, SUBSTRATE_REFERENCE_HARDWARE};
-use node_potw_runtime::{Block, EXISTENTIAL_DEPOSIT};
-use sc_cli::{ChainSpec, RuntimeVersion, SubstrateCli};
+use node_template_runtime::{Block, EXISTENTIAL_DEPOSIT};
+use sc_cli::SubstrateCli;
 use sc_service::PartialComponents;
 use sp_keyring::Sr25519Keyring;
 
 #[cfg(feature = "try-runtime")]
-use {
-	node_potw_runtime::constants::time::SLOT_DURATION,
-	try_runtime_cli::block_building_info::substrate_info,
-};
+use try_runtime_cli::block_building_info::timestamp_with_aura_info;
 
 impl SubstrateCli for Cli {
 	fn impl_name() -> String {
@@ -49,19 +46,6 @@ impl SubstrateCli for Cli {
 				Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
 		})
 	}
-
-	// fn native_runtime_version(_: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
-	// 	&node_potw_runtime::VERSION
-	// }
-	// fn load_spec(&self, id: &str) -> Result<Box<dyn sc_service::ChainSpec>, String> {
-	// 	Ok(match id {
-	// 		"dev" => Box::new(chain_spec::development_config()?),
-	// 		"" | "local" => Box::new(chain_spec::local_testnet_config()?),
-	// 		"staging" => Box::new(chain_spec::staging_network_config()),
-	// 		path =>
-	// 			Box::new(chain_spec::ChainSpec::from_json_file(std::path::PathBuf::from(path))?),
-	// 	})
-	// }
 }
 
 /// Parse and run command line arguments
@@ -136,7 +120,6 @@ pub fn run() -> sc_cli::Result<()> {
 							)
 						}
 
-						// cmd.run::<Block, service::ExecutorDispatch>(config)
 						cmd.run::<Block, ()>(config)
 					},
 					BenchmarkCmd::Block(cmd) => {
@@ -200,8 +183,7 @@ pub fn run() -> sc_cli::Result<()> {
 				let task_manager =
 					sc_service::TaskManager::new(config.tokio_handle.clone(), registry)
 						.map_err(|e| sc_cli::Error::Service(sc_service::Error::Prometheus(e)))?;
-
-				let info_provider = substrate_info(SLOT_DURATION);
+				let info_provider = timestamp_with_aura_info(6000);
 
 				Ok((
 					cmd.run::<Block, ExtendedHostFunctions<
@@ -223,7 +205,7 @@ pub fn run() -> sc_cli::Result<()> {
 		None => {
 			let runner = cli.create_runner(&cli.run)?;
 			runner.run_node_until_exit(|config| async move {
-				service::new_full(config, cli).map_err(sc_cli::Error::Service)
+				service::new_full(config).map_err(sc_cli::Error::Service)
 			})
 		},
 	}
