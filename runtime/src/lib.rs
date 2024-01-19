@@ -544,16 +544,16 @@ impl pallet_session::Config for Runtime {
 	type ShouldEndSession = Babe;
 	type NextSessionRotation = Babe;
 	// type SessionManager = pallet_session::historical::NoteHistoricalRoot<Self, Staking>;
-	type SessionManager = pallet_template::SessionManager<pallet_session::historical::NoteHistoricalRoot<Self, Staking>>;
+	type SessionManager = TemplateModule;
 	type SessionHandler = <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type Keys = SessionKeys;
 	type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
 }
 
-impl pallet_session::historical::Config for Runtime {
-	type FullIdentification = pallet_staking::Exposure<AccountId, Balance>;
-	type FullIdentificationOf = pallet_staking::ExposureOf<Runtime>;
-}
+// impl pallet_session::historical::Config for Runtime {
+// 	type FullIdentification = pallet_staking::Exposure<AccountId, Balance>;
+// 	type FullIdentificationOf = pallet_staking::ExposureOf<Runtime>;
+// }
 
 pallet_staking_reward_curve::build! {
 	const REWARD_CURVE: PiecewiseLinear<'static> = curve!(
@@ -593,20 +593,10 @@ impl pallet_assets::Config for Runtime {
 }
 
 impl pallet_template::Config for Runtime {
+	type AddRemoveOrigin = EnsureRoot<Self::AccountId>;
 	type RuntimeEvent = RuntimeEvent;
-	type WeightInfo = pallet_template::weights::SubstrateWeight<Runtime>;
-	type Token = Balances; // <Self as pallet_balances::Config>::Currency;
-	type Score = Assets;
-	type TaskCredit = Assets;
-	// type ScoreNow = ScoreType;
-	type ScoreBalance = AssetBalance;
-	type TaskCreditBalance = AssetBalance;
-	// type TaskCredit = Balances;
-	type TokenToTaskCredit = Identity;
-	type MaxTasksOwned = ConstU32<100>;
-	type AssetToCurrencyBalance = Identity;
-	type CurrencyToAssetBalance = Identity;
-
+	type MinAuthorities = MinAuthorities;
+	type WeightInfo = ();
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -630,7 +620,7 @@ construct_runtime!(
 		Session: pallet_session,
 		Assets: pallet_assets,
 		VoterList: pallet_bags_list::<Instance1>,
-		Historical: pallet_session::historical::{Pallet},
+		// Historical: pallet_session::historical::{Pallet},
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template,
 	}
@@ -1043,9 +1033,5 @@ mod tests {
 	}
 
 
-	#[test]
-	fn check_whitelist2() {
-		//assert_ok!(TemplateModule::deposit_token_to_taskcredit(RuntimeOrigin::signed(1), 1234));
-		//assert_ok!(TemplateModule::create_task(RuntimeOrigin::signed(1),"hello".into(), 12));
-	}
+
 }
