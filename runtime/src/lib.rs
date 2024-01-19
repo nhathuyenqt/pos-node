@@ -772,9 +772,10 @@ impl_runtime_apis! {
 		) -> Option<sp_consensus_babe::OpaqueKeyOwnershipProof> {
 			use codec::Encode;
 
-			Historical::prove((sp_consensus_babe::KEY_TYPE, authority_id))
-				.map(|p| p.encode())
-				.map(sp_consensus_babe::OpaqueKeyOwnershipProof::new)
+			// Historical::prove((sp_consensus_babe::KEY_TYPE, authority_id))
+			// 	.map(|p| p.encode())
+			// 	.map(sp_consensus_babe::OpaqueKeyOwnershipProof::new)
+			None
 		}
 
 		fn submit_report_equivocation_unsigned_extrinsic(
