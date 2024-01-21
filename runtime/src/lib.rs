@@ -33,7 +33,7 @@ use sp_runtime::{
 	ApplyExtrinsicResult, MultiSignature,
 };
 use pallet_session::ShouldEndSession;
-use frame_support::BasicExternalities;
+
 
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
@@ -550,10 +550,10 @@ impl pallet_session::Config for Runtime {
 	type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
 }
 
-// impl pallet_session::historical::Config for Runtime {
-// 	type FullIdentification = pallet_staking::Exposure<AccountId, Balance>;
-// 	type FullIdentificationOf = pallet_staking::ExposureOf<Runtime>;
-// }
+impl pallet_session::historical::Config for Runtime {
+	type FullIdentification = pallet_staking::Exposure<AccountId, Balance>;
+	type FullIdentificationOf = pallet_staking::ExposureOf<Runtime>;
+}
 
 pallet_staking_reward_curve::build! {
 	const REWARD_CURVE: PiecewiseLinear<'static> = curve!(
@@ -590,6 +590,10 @@ impl pallet_assets::Config for Runtime {
 	type RemoveItemsLimit = ();
 	type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
 	type AssetIdParameter = codec::Compact<u32>;
+}
+
+parameter_types! {
+	pub const MinAuthorities: u32 = 2;
 }
 
 impl pallet_template::Config for Runtime {

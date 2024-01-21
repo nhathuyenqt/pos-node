@@ -277,7 +277,8 @@ fn testnet_genesis(
 ) ->  RuntimeGenesisConfig {
 
 	let accs = endowed_accounts.clone();
-	let balances: Vec<_> = accs.iter().cloned().map(|k| (k, 1 << 60)).collect();
+	let initial_validators = accs.clone();
+	//let balances: Vec<_> = accs.iter().cloned().map(|k| (k, 1 << 60)).collect();
 	// endow all authorities and nominators.
 	initial_authorities
 		.iter()
@@ -309,6 +310,16 @@ fn testnet_genesis(
 			(x.clone(), x.clone(), STASH, StakerStatus::Nominator(nominations))
 		}))
 		.collect::<Vec<_>>();
+	
+	// let keys: Vec<_> = NEXT_VALIDATORS
+	// 	.with(|l| l.borrow().iter().cloned().map(|i| (i, i, UintAuthorityId(i).into())).collect());
+	// BasicExternalities::execute_with_storage(&mut t, || {
+	// 	for (ref k, ..) in &keys {
+	// 		frame_system::Pallet::<Test>::inc_providers(k);
+	// 	}
+	// 	frame_system::Pallet::<Test>::inc_providers(&4);
+	// 	frame_system::Pallet::<Test>::inc_providers(&69);
+	// });
 
 	RuntimeGenesisConfig {
 		assets: AssetsConfig {
@@ -359,6 +370,9 @@ fn testnet_genesis(
 			key: Some(root_key),
 		},
 		transaction_payment: Default::default(),
+		template_module: TemplateModuleConfig{
+			initial_validators: initial_validators //keys.iter().map(|x| x.0).collect::<Vec<_>>(),
+		}
 	
 	}
 }
