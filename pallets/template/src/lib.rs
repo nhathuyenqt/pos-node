@@ -22,6 +22,7 @@ mod benchmarking;
 
 pub mod weights;
 
+use pallet_babe::EpochChangeTrigger;
 use frame_system::pallet_prelude::*;
 use frame_support::{
 	ensure,
@@ -31,6 +32,7 @@ use frame_support::{
 };
 use log;
 pub use pallet::*;
+use pallet_babe::ExternalTrigger;
 use sp_runtime::traits::{Convert, Zero};
 use sp_staking::offence::{Offence, OffenceError, ReportOffence};
 use sp_std::prelude::*;
@@ -82,6 +84,7 @@ pub mod pallet {
 		ValidatorRemovalInitiated(T::ValidatorId),
 	}
 
+	
 	// Errors inform users that something went wrong.
 	#[pallet::error]
 	pub enum Error<T> {
@@ -299,4 +302,7 @@ impl<T: Config, O: Offence<(T::ValidatorId, T::ValidatorId)>>
 	) -> bool {
 		false
 	}
+
+	
 }
+

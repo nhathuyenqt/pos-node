@@ -545,7 +545,7 @@ impl pallet_session::Config for Runtime {
 	type NextSessionRotation = Babe;
 	// type SessionManager = pallet_session::historical::NoteHistoricalRoot<Self, Staking>;
 	type SessionManager = TemplateModule;
-	type SessionHandler = <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
+	type SessionHandler =  <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type Keys = SessionKeys;
 	type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
 }
