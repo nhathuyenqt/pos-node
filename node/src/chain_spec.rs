@@ -268,7 +268,7 @@ fn staging_network_config_genesis() -> RuntimeGenesisConfig {
 /// Configure initial storage state for FRAME modules.
 fn testnet_genesis(
 	wasm_binary: &[u8],
-	initial_tasks: Vec<(AccountId, [u8; 16], u8)>,
+	initial_profiles: Vec<(AccountId, [u8; 16], u8)>,
 	initial_authorities: Vec<(AccountId, AccountId, BabeId, GrandpaId)>,
 	initial_nominators: Vec<AccountId>,
 	root_key: AccountId,

@@ -22,26 +22,36 @@ mod benchmarking;
 
 pub mod weights;
 
+use core::mem;
+
 use frame_system::pallet_prelude::*;
 use frame_support::{
 	ensure,
 	pallet_prelude::*,
-	traits::{EstimateNextSessionRotation, Get, ValidatorSet, ValidatorSetWithIdentification},
+	traits::{
+		EstimateNextSessionRotation, Get, ValidatorSet, ValidatorSetWithIdentification,
+		tokens::Balance,
+		fungibles::{Create, Destroy, Inspect, Mutate}
+	},
 	DefaultNoBound,
 };
 use log;
 pub use pallet::*;
-use pallet_babe::Committee;
+// use pallet_babe::Committee;
 use sp_runtime::traits::{Convert, Zero};
 use sp_staking::offence::{Offence, OffenceError, ReportOffence};
 use sp_std::prelude::*;
 pub use weights::*;
 
-pub const LOG_TARGET: &'static str = "runtime::validator-set";
+pub const LOG_TARGET: &'static str = "runtime::committee";
 
 #[frame_support::pallet()]
 pub mod pallet {
-	use super::*;
+	use core::ops::Bound;
+
+	use sp_runtime::FixedPointOperand;
+
+use super::*;
 
 	/// Configure the pallet by specifying the parameters and types on which it
 	/// depends.
@@ -59,15 +69,33 @@ pub mod pallet {
 
 		/// Information on runtime weights.
 		type WeightInfo: WeightInfo;
+
+		type XIndexBalance: Balance
+			+ FixedPointOperand + MaxEncodedLen + MaybeSerializeDeserialize + TypeInfo;
+		type XIndex: Inspect<Self::AccountId, AssetId = u32, Balance = Self::XIndexBalance> 
+			+ Mutate<Self::AccountId> + Create<Self::AccountId> + Destroy<Self::AccountId>;
 	}
 
 	#[pallet::pallet]
 	#[pallet::without_storage_info]
 	pub struct Pallet<T>(_);
 
+	#[derive(Clone, Encode, Decode, PartialEq, RuntimeDebug, TypeInfo, MaxEncodedLen)]
+	#[scale_info(skip_type_params(T))]
+	pub struct Profile<T: Config>{
+		pub id: [u8; 16],
+		pub reputation: u32,
+		pub addr: T::AccountId,
+		pub note: BoundedVec<u8, ConstU32<1000>>
+	}
+
 	#[pallet::storage]
 	#[pallet::getter(fn committee)]
 	pub type Committee<T: Config> = StorageValue<_, Vec<(T::AccountId, u64)>, ValueQuery>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn candidates)]
+	pub type Candidates<T: Config> = StorageMap<_, Twox64Concat, [u8; 16], Profile<T>>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn validators)]
@@ -85,6 +113,7 @@ pub mod pallet {
 
 		/// Validator removal initiated. Effective in ~2 sessions.
 		ValidatorRemovalInitiated(T::ValidatorId),
+		NewProfile( T::AccountId, [u8; 16])
 	}
 
 	
@@ -95,6 +124,7 @@ pub mod pallet {
 		TooLowValidatorCount,
 		/// Validator is already in the validator set.
 		Duplicate,
+		TooLong
 	}
 
 	#[pallet::hooks]
@@ -148,7 +178,21 @@ pub mod pallet {
 
 			Ok(())
 		}
+
+
+		#[pallet::call_index(2)]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::add_validator())]
+		pub fn create_profile(origin: OriginFor<T>, note: Vec<u8>) -> DispatchResult {
+
+			let sender = ensure_signed(origin)?;
+			let bounded_note : BoundedVec<_, _> = note.try_into().map_err(|_| Error::<T>::TooLong)?;
+			Self::do_add_profile(&sender, bounded_note)?;
+
+			Ok(())
+		}
 	}
+
+
 }
 
 impl<T: Config> Pallet<T> {
@@ -217,6 +261,19 @@ impl<T: Config> Pallet<T> {
 		// Clear the offline validator list to avoid repeated deletion.
 		<OfflineValidators<T>>::put(Vec::<T::ValidatorId>::new());
 	}
+
+
+	fn do_add_profile(member: &T::AccountId, note : BoundedVec<u8, ConstU32<1000>>) -> 	DispatchResult{
+
+		let encoded_payload = (member.clone(), note.clone()).encode();
+		let id = frame_support::Hashable::blake2_128(&encoded_payload);
+		let profile = Profile::<T>{id: id, reputation: 0u32, addr: member.clone(), note: note};
+		Candidates::<T>::insert(profile.id, profile);
+		Self::deposit_event(Event::NewProfile(member.clone(),id.clone()));
+		Ok(())
+	}	
+
+	
 }
 
 // Provides the new set of validators to the session module when session is

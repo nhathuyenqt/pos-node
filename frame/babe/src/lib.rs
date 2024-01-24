@@ -657,11 +657,11 @@ impl<T: Config> Pallet<T> {
 
 		let custom_auth: Vec<(AuthorityId, BabeAuthorityWeight)> = vec![];
 
-		for (acc, w) in candidates.into_iter(){
-			// let acc_bytes = acc.into();
-			let who: AuthorityId = sp_core::sr25519::Public::from_raw(acc).into();
-			 custom_auth.push((who, w)); // TODO: convert acc to AuthorityId
-		}
+		// for (acc, w) in candidates.into_iter(){
+		// 	// let acc_bytes = acc.into();
+		// 	let who: AuthorityId = sp_core::sr25519::Public::from_raw(acc).into();
+		// 	 custom_auth.push((who, w)); // TODO: convert acc to AuthorityId
+		// }
 
 
 		// Update the next epoch authorities.

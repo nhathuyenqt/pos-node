@@ -602,6 +602,9 @@ impl pallet_template::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type MinAuthorities = MinAuthorities;
 	type WeightInfo = ();
+	type XIndex = Assets;
+	type XIndexBalance = AssetBalance;
+	// type CurrencyToAssetBalance = Identity;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
