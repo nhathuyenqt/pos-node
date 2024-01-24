@@ -81,7 +81,7 @@ pub trait WeightInfo {
 pub trait Committee<AccountId>{
 	/// Trigger an epoch change, if any should take place. This should be called
 	/// during every block, after initialization is done.
-	fn get_new_committee() -> Option<Vec<(AccountId, u64)>>;
+	fn get_new_committee() -> Vec<(AccountId, u64)>;
 }
 
 /// Trigger an epoch change, if any should take place.
@@ -653,6 +653,14 @@ impl<T: Config> Pallet<T> {
 		// epoch randomness.
 		let randomness = Self::randomness_change_epoch(next_epoch_index);
 		Randomness::<T>::put(randomness);
+		let candidates = T::Committee::get_new_committee();
+
+		let custom_auth: Vec<(AuthorityId, BabeAuthorityWeight)> = vec![];
+
+		for (acc, w) in candidates.iter(){
+			 custom_auth.push((acc, *w)); // TODO: convert acc to AuthorityOd
+		}
+
 
 		// Update the next epoch authorities.
 		NextAuthorities::<T>::put(&next_authorities);

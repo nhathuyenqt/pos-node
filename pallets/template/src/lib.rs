@@ -310,7 +310,7 @@ impl<T: Config, O: Offence<(T::ValidatorId, T::ValidatorId)>>
 }
 
 impl<T: Config> pallet_babe::Committee<T::AccountId> for Pallet<T>{
-	fn get_new_committee() -> Option<Vec<(T::AccountId, u64)>> {
+	fn get_new_committee() -> Vec<(T::AccountId, u64)> {
 		let mut com_vec 	= Default::default();
 		return com_vec;
 
