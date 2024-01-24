@@ -1,3 +1,5 @@
+
+
 // This file is part of Substrate.
 
 // Copyright (C) Parity Technologies (UK) Ltd.
@@ -72,7 +74,14 @@ pub use pallet::*;
 
 pub trait WeightInfo {
 	fn plan_config_change() -> Weight;
-	fn report_equivocation(validator_count: u32, max_nominators_per_validator: u32) -> Weight;
+	fn report_equivocation(validator_count: u32) -> Weight;
+}
+
+
+pub trait Committee<AccountId>{
+	/// Trigger an epoch change, if any should take place. This should be called
+	/// during every block, after initialization is done.
+	fn get_new_committee() -> Option<Vec<(AccountId, u64)>>;
 }
 
 /// Trigger an epoch change, if any should take place.
@@ -120,6 +129,7 @@ pub mod pallet {
 	#[pallet::config]
 	#[pallet::disable_frame_system_supertrait_check]
 	pub trait Config: pallet_timestamp::Config {
+		type Committee : Committee<Self::AccountId>;
 		/// The amount of time, in slots, that each epoch should last.
 		/// NOTE: Currently it is not possible to change the epoch duration after
 		/// the chain has started. Attempting to do so will brick block production.
@@ -152,10 +162,6 @@ pub mod pallet {
 		/// Max number of authorities allowed
 		#[pallet::constant]
 		type MaxAuthorities: Get<u32>;
-
-		/// The maximum number of nominators for each validator.
-		#[pallet::constant]
-		type MaxNominators: Get<u32>;
 
 		/// The proof of key ownership, used for validating equivocation reports.
 		/// The proof must include the session index and validator count of the
@@ -322,7 +328,7 @@ pub mod pallet {
 	#[derive(frame_support::DefaultNoBound)]
 	#[pallet::genesis_config]
 	pub struct GenesisConfig<T: Config> {
-		pub authorities: Vec<(AuthorityId, u64)>,
+		pub authorities: Vec<(AuthorityId, BabeAuthorityWeight)>,
 		pub epoch_config: Option<BabeEpochConfiguration>,
 		#[serde(skip)]
 		pub _config: sp_std::marker::PhantomData<T>,
@@ -411,7 +417,6 @@ pub mod pallet {
 		#[pallet::call_index(0)]
 		#[pallet::weight(<T as Config>::WeightInfo::report_equivocation(
 			key_owner_proof.validator_count(),
-			T::MaxNominators::get(),
 		))]
 		pub fn report_equivocation(
 			origin: OriginFor<T>,
@@ -438,7 +443,6 @@ pub mod pallet {
 		#[pallet::call_index(1)]
 		#[pallet::weight(<T as Config>::WeightInfo::report_equivocation(
 			key_owner_proof.validator_count(),
-			T::MaxNominators::get(),
 		))]
 		pub fn report_equivocation_unsigned(
 			origin: OriginFor<T>,

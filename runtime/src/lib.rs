@@ -32,7 +32,7 @@ use sp_runtime::{
 	transaction_validity::{TransactionSource, TransactionValidity, TransactionPriority},
 	ApplyExtrinsicResult, MultiSignature,
 };
-use pallet_session::ShouldEndSession;
+// use pallet_session::ShouldEndSession;
 
 
 use sp_std::prelude::*;
@@ -238,13 +238,14 @@ parameter_types! {
 impl pallet_babe::Config for Runtime {
 	type EpochDuration = EpochDuration;
 	type ExpectedBlockTime = ExpectedBlockTime;
-	type EpochChangeTrigger = pallet_babe::ExternalTrigger;
+	type EpochChangeTrigger = pallet_babe::SameAuthoritiesForever;
 	type DisabledValidators = (); // TODO Session;
 	type WeightInfo = ();
 	type MaxAuthorities = MaxAuthorities;
 	type KeyOwnerProof = <() as KeyOwnerProofSystem<(KeyTypeId, pallet_babe::AuthorityId)>>::Proof;
 		// TODO <Historical as KeyOwnerProofSystem<(KeyTypeId, pallet_babe::AuthorityId)>>::Proof;
 	type EquivocationReportSystem = ();
+	type Committee = TemplateModule;
 		// TODO pallet_babe::EquivocationReportSystem<Self, Offences, Historical, ReportLongevity>;
 }
 

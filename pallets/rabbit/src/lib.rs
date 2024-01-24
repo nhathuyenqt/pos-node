@@ -22,6 +22,7 @@ mod benchmarking;
 
 pub mod weights;
 
+use pallet_babe::EpochChangeTrigger;
 use frame_system::pallet_prelude::*;
 use frame_support::{
 	ensure,
@@ -31,7 +32,7 @@ use frame_support::{
 };
 use log;
 pub use pallet::*;
-use pallet_babe::Committee;
+use pallet_babe::ExternalTrigger;
 use sp_runtime::traits::{Convert, Zero};
 use sp_staking::offence::{Offence, OffenceError, ReportOffence};
 use sp_std::prelude::*;
@@ -46,7 +47,7 @@ pub mod pallet {
 	/// Configure the pallet by specifying the parameters and types on which it
 	/// depends.
 	#[pallet::config]
-	pub trait Config: frame_system::Config + pallet_session::Config {
+	pub trait Config: frame_system::Config + pallet_session::Config + pallet_babe::Config{
 		/// The Event type.
 		type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
@@ -64,10 +65,6 @@ pub mod pallet {
 	#[pallet::pallet]
 	#[pallet::without_storage_info]
 	pub struct Pallet<T>(_);
-
-	#[pallet::storage]
-	#[pallet::getter(fn committee)]
-	pub type Committee<T: Config> = StorageValue<_, Vec<(T::AccountId, u64)>, ValueQuery>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn validators)]
@@ -309,10 +306,13 @@ impl<T: Config, O: Offence<(T::ValidatorId, T::ValidatorId)>>
 	
 }
 
-impl<T: Config> pallet_babe::Committee<T::AccountId> for Pallet<T>{
-	fn get_new_committee() -> Option<Vec<(T::AccountId, u64)>> {
-		let mut com_vec 	= Default::default();
-		return com_vec;
+// impl<T: Config> pallet_babe::EpochChangeTrigger for Pallet<T>{
+// 	fn trigger<T: Config>(now: BlockNumberFor<T>) {
+// 		if <Pallet<T>>::should_epoch_change(now) {
+// 			let authorities = <Pallet<T>>::authorities();
+// 			let next_authorities = authorities.clone();
 
-	}
-}
+// 			<Pallet<T>>::enact_epoch_change(authorities, next_authorities, None);
+// 		}
+// 	}
+// }
