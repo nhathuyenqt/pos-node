@@ -816,8 +816,8 @@ pub fn new_partial(
 			Some(shared_authority_set.clone()),
 		);
 
-		let babe_config = babe_link.config().clone();
-		let shared_epoch_changes = babe_link.epoch_changes().clone();
+		// let babe_config = babe_link.config().clone();
+		// let shared_epoch_changes = babe_link.epoch_changes().clone();
 
 		let client = client.clone();
 		let pool = transaction_pool.clone();

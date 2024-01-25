@@ -22,7 +22,7 @@ mod benchmarking;
 
 pub mod weights;
 
-use core::mem;
+// use core::mem;
 
 use frame_system::pallet_prelude::*;
 use frame_support::{
@@ -131,15 +131,24 @@ use super::*;
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
 	#[pallet::genesis_config]
-	#[derive(DefaultNoBound)]
+	// #[derive(DefaultNoBound)]
 	pub struct GenesisConfig<T: Config> {
-		pub initial_validators: Vec<T::ValidatorId>,
+		// pub initial_validators: Vec<T::ValidatorId>,
+		pub initial_committee: Vec<T::AccountId>,
+	}
+
+	impl<T: Config> Default for GenesisConfig<T>{
+		fn default() -> Self{
+			Self{
+				initial_committee: Default::default()
+			}
+		}
 	}
 
 	#[pallet::genesis_build]
 	impl<T: Config> BuildGenesisConfig for GenesisConfig<T> {
 		fn build(&self) {
-			Pallet::<T>::initialize_validators(&self.initial_validators);
+			// Pallet::<T>::initialize_validators(&self.initial_validators);
 		}
 	}
 

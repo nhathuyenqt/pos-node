@@ -32,9 +32,6 @@ use sp_runtime::{
 	transaction_validity::{TransactionSource, TransactionValidity, TransactionPriority},
 	ApplyExtrinsicResult, MultiSignature,
 };
-// use pallet_session::ShouldEndSession;
-
-
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
@@ -234,6 +231,8 @@ parameter_types! {
 		// BondingDuration::get() as u64 * SessionsPerEra::get() as u64 * EpochDuration::get();
 	pub const MaxAuthorities: u32 = 100;
 }
+
+
 
 impl pallet_babe::Config for Runtime {
 	type EpochDuration = EpochDuration;
@@ -488,14 +487,14 @@ impl pallet_staking::BenchmarkingConfig for StakingBenchmarkingConfig {
 }
 
 impl pallet_staking::Config for Runtime {
-	type Currency = Balances;// <Runtime as pallet_template::Config>::Score;
-	type CurrencyBalance = Balance;// pallet_template::Score::Balance; //Balance;
+	type Currency = Balances;
+	type CurrencyBalance = Balance;
 	type UnixTime = Timestamp;
 	type MaxNominations = MaxNominations;
 	type CurrencyToVote = sp_staking::currency_to_vote::U128CurrencyToVote;
 	type RewardRemainder = (); // TODO Treasury
 	type RuntimeEvent = RuntimeEvent;
-	type Slash = ();//pallet_template::ScoreBalanceOf<AccountId>; // TODO Treasury send the slashed funds to the treasury.
+	type Slash = (); // TODO Treasury send the slashed funds to the treasury.
 	type Reward = (); // rewards are minted from the void
 	type SessionsPerEra = SessionsPerEra;
 	type BondingDuration = BondingDuration;
@@ -544,9 +543,9 @@ impl pallet_session::Config for Runtime {
 	type ValidatorIdOf = pallet_staking::StashOf<Self>;
 	type ShouldEndSession = Babe;
 	type NextSessionRotation = Babe;
-	// type SessionManager = pallet_session::historical::NoteHistoricalRoot<Self, Staking>;
-	type SessionManager = TemplateModule;
-	type SessionHandler =  <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
+	type SessionManager = pallet_session::historical::NoteHistoricalRoot<Self, Staking>;
+	// type SessionManager = pallet_template::SessionManager<pallet_session::historical::NoteHistoricalRoot<Self, Staking>>;
+	type SessionHandler = <SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type Keys = SessionKeys;
 	type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
 }
@@ -628,7 +627,7 @@ construct_runtime!(
 		Session: pallet_session,
 		Assets: pallet_assets,
 		VoterList: pallet_bags_list::<Instance1>,
-		// Historical: pallet_session::historical::{Pallet},
+		Historical: pallet_session::historical::{Pallet},
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template,
 	}
@@ -780,10 +779,9 @@ impl_runtime_apis! {
 		) -> Option<sp_consensus_babe::OpaqueKeyOwnershipProof> {
 			use codec::Encode;
 
-			// Historical::prove((sp_consensus_babe::KEY_TYPE, authority_id))
-			// 	.map(|p| p.encode())
-			// 	.map(sp_consensus_babe::OpaqueKeyOwnershipProof::new)
-			None
+			Historical::prove((sp_consensus_babe::KEY_TYPE, authority_id))
+				.map(|p| p.encode())
+				.map(sp_consensus_babe::OpaqueKeyOwnershipProof::new)
 		}
 
 		fn submit_report_equivocation_unsigned_extrinsic(
@@ -1042,5 +1040,9 @@ mod tests {
 	}
 
 
-
+	#[test]
+	fn check_whitelist2() {
+		//assert_ok!(TemplateModule::deposit_token_to_taskcredit(RuntimeOrigin::signed(1), 1234));
+		//assert_ok!(TemplateModule::create_task(RuntimeOrigin::signed(1),"hello".into(), 12));
+	}
 }
