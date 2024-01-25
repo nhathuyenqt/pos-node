@@ -56,7 +56,7 @@ pub fn authority_keys_from_seed(s: &str) -> (AccountId, AccountId, BabeId, Grand
 
 pub fn development_config() -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
-	let hash_task: [u8; 16] =  [0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0];
+	// let hash_task: [u8; 16] =  [0x1, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0];
 	Ok(ChainSpec::from_genesis(
 		// Name
 		"Development",
@@ -66,7 +66,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
 		move || {
 			testnet_genesis(
 				wasm_binary,
-				vec![(get_account_id_from_seed::<sr25519::Public>("Alice"), hash_task, 0)],
+				// vec![(get_account_id_from_seed::<sr25519::Public>("Alice"), hash_task, 0)],
 				// Initial PoA authorities
 				vec![authority_keys_from_seed("Alice")],
 				vec![],
@@ -109,7 +109,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 		move || {
 			testnet_genesis(
 				wasm_binary,
-				vec![(get_account_id_from_seed::<sr25519::Public>("Alice"), hash_task, 0u8)],
+				// vec![(get_account_id_from_seed::<sr25519::Public>("Alice"), hash_task, 0u8)],
 				// Initial PoA authorities
 				vec![authority_keys_from_seed("Alice"), authority_keys_from_seed("Bob")],
 				vec![],
@@ -268,7 +268,6 @@ fn staging_network_config_genesis() -> RuntimeGenesisConfig {
 /// Configure initial storage state for FRAME modules.
 fn testnet_genesis(
 	wasm_binary: &[u8],
-	initial_tasks: Vec<(AccountId, [u8; 16], u8)>,
 	initial_authorities: Vec<(AccountId, AccountId, BabeId, GrandpaId)>,
 	initial_nominators: Vec<AccountId>,
 	root_key: AccountId,
@@ -278,7 +277,8 @@ fn testnet_genesis(
 
 	let accs = endowed_accounts.clone();
 	let initial_validators = accs.clone();
-	//let balances: Vec<_> = accs.iter().cloned().map(|k| (k, 1 << 60)).collect();
+	// let balances: Vec<_> = accs.iter().cloned().map(|k| (k, 1 << 60)).collect();
+
 	// endow all authorities and nominators.
 	initial_authorities
 		.iter()
@@ -310,16 +310,6 @@ fn testnet_genesis(
 			(x.clone(), x.clone(), STASH, StakerStatus::Nominator(nominations))
 		}))
 		.collect::<Vec<_>>();
-	
-	// let keys: Vec<_> = NEXT_VALIDATORS
-	// 	.with(|l| l.borrow().iter().cloned().map(|i| (i, i, UintAuthorityId(i).into())).collect());
-	// BasicExternalities::execute_with_storage(&mut t, || {
-	// 	for (ref k, ..) in &keys {
-	// 		frame_system::Pallet::<Test>::inc_providers(k);
-	// 	}
-	// 	frame_system::Pallet::<Test>::inc_providers(&4);
-	// 	frame_system::Pallet::<Test>::inc_providers(&69);
-	// });
 
 	RuntimeGenesisConfig {
 		assets: AssetsConfig {
@@ -370,9 +360,8 @@ fn testnet_genesis(
 			key: Some(root_key),
 		},
 		transaction_payment: Default::default(),
-		template_module: TemplateModuleConfig{
-			initial_validators: initial_validators //keys.iter().map(|x| x.0).collect::<Vec<_>>(),
-		}
-	
+		template_module: TemplateModuleConfig {
+			..Default::default()
+		},
 	}
 }
