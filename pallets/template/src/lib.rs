@@ -22,7 +22,7 @@ mod benchmarking;
 
 pub mod weights;
 
-// use core::mem;
+use core::mem;
 
 use frame_system::pallet_prelude::*;
 use frame_support::{
@@ -38,7 +38,7 @@ use frame_support::{
 use log;
 pub use pallet::*;
 // use pallet_babe::Committee;
-use sp_runtime::traits::{Convert, Zero};
+use sp_runtime::traits::{Convert, Zero, Member};
 use sp_staking::offence::{Offence, OffenceError, ReportOffence};
 use sp_std::prelude::*;
 pub use weights::*;
@@ -74,6 +74,10 @@ use super::*;
 			+ FixedPointOperand + MaxEncodedLen + MaybeSerializeDeserialize + TypeInfo;
 		type XIndex: Inspect<Self::AccountId, AssetId = u32, Balance = Self::XIndexBalance> 
 			+ Mutate<Self::AccountId> + Create<Self::AccountId> + Destroy<Self::AccountId>;
+
+		// type AccountIdToValidatorId: Convert<Self::AccountId, Option<Self::ValidatorId>>;
+		// type ValidatorId: Member + Parameter + MaybeSerializeDeserialize + MaxEncodedLen + TryFrom<Self::AccountId>;
+		// type ValidatorIdOf: Convert<Self::AccountId, Option<Self::ValidatorId>>;
 	}
 
 	#[pallet::pallet]
@@ -92,6 +96,10 @@ use super::*;
 	#[pallet::storage]
 	#[pallet::getter(fn committee)]
 	pub type Committee<T: Config> = StorageValue<_, Vec<(T::AccountId, u64)>, ValueQuery>;
+
+	// #[pallet::storage]
+	// #[pallet::getter(fn nextcommittee)]
+	// pub type NextCommittee<T: Config> = StorageMap<_, T::AccountId, u64>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn candidates)]
@@ -282,6 +290,21 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}	
 
+	// fn get_new_validator_list() -> Vec<(T::AccountId, u64)>{
+	// 	// const maxA : u32 = T::MaxAuthorities::get();
+	// 	let mut acc_vec: Vec<(T::AccountId, u64)> = vec![];
+	// 	for (account_id, boardInfo) in ScoreBoard::<T>::iter(){
+		
+	// 		acc_vec.push((account_id, boardInfo.score.clone().saturated_into::<u64>()));
+	// 	}
+		
+	// 	// let mut my_vec: Vec<(T::AccountId, u64)> = Default::default();
+	// 	// let bounded_authorities =
+	// 	// 	Vec::<_, T::MaxAuthorities>::try_from(my_vec.to_vec())
+	// 	// 		.expect("Initial number of authorities should be lower than T::MaxAuthorities");
+	// 	return acc_vec;
+	// 	// return my_vec;
+	// }
 	
 }
 
@@ -292,11 +315,24 @@ impl<T: Config> pallet_session::SessionManager<T::ValidatorId> for Pallet<T> {
 	fn new_session(_new_index: u32) -> Option<Vec<T::ValidatorId>> {
 		// Remove any offline validators. This will only work when the runtime
 		// also has the im-online pallet.
-		Self::remove_offline_validators();
+		// Self::remove_offline_validators();
 
-		log::debug!(target: LOG_TARGET, "New session called; updated validator set provided.");
+		
 
-		Some(Self::validators())
+		// log::debug!(target: LOG_TARGET, "New session called; updated validator set provided.");
+
+		// Some(Self::validators())
+		let x: Vec<(T::AccountId, u64)> = Self::committee();
+		let mut y: Vec<T::ValidatorId> = vec![];
+
+		// for (account_id, w) in x.into_iter(){
+		// 	let a = ValidatorOf::<T>::convert(account_id).unwrap();
+		// 	y.push(a);
+			
+		// }
+		
+		Some(y)
+		
 	}
 
 	fn end_session(_end_index: u32) {}
@@ -332,20 +368,20 @@ impl<T: Config> Convert<T::ValidatorId, Option<T::ValidatorId>> for ValidatorOf<
 	}
 }
 
-impl<T: Config> ValidatorSet<T::ValidatorId> for Pallet<T> {
+impl<T: Config> ValidatorSet<T::AccountId> for Pallet<T> {
 	type ValidatorId = T::ValidatorId;
-	type ValidatorIdOf = ValidatorOf<T>;
+	type ValidatorIdOf = T::ValidatorIdOf;
 
 	fn session_index() -> sp_staking::SessionIndex {
 		pallet_session::Pallet::<T>::current_index()
 	}
 
-	fn validators() -> Vec<T::ValidatorId> {
+	fn validators() -> Vec<Self::ValidatorId> {
 		pallet_session::Pallet::<T>::validators()
 	}
 }
 
-impl<T: Config> ValidatorSetWithIdentification<T::ValidatorId> for Pallet<T> {
+impl<T: Config> ValidatorSetWithIdentification<T::AccountId> for Pallet<T> {
 	type Identification = T::ValidatorId;
 	type IdentificationOf = ValidatorOf<T>;
 }
@@ -371,14 +407,23 @@ impl<T: Config, O: Offence<(T::ValidatorId, T::ValidatorId)>>
 	) -> bool {
 		false
 	}
-
-	
 }
 
-impl<T: Config> pallet_babe::Committee<T::AccountId> for Pallet<T>{
-	fn get_new_committee() -> Vec<(T::AccountId, u64)> {
-		let mut com_vec 	= Default::default();
-		return com_vec;
+impl<T: Config> pallet_babe::Committee<<T as frame_system::Config >::AccountId> for Pallet<T>{
+	/// Trigger an epoch change, if any should take place. This should be called
+	/// during every block, after initialization is done.
+	fn get_new_committee() -> Vec<(T::AccountId, u64)>{
+		
+		// let mut acc_vec: Vec<(T::AccountId, u64)> = vec![];
+		// for (account_id, boardInfo) in Committee::<T>::iter(){
+		
+		// 	// acc_vec.push((account_id, boardInfo.score.clone().saturated_into::<u64>()));
+		// }
 
+		let acc_vec: Vec<(T::AccountId, u64)> = Self::committee();
+		
+
+		return acc_vec;
+		// return my_vec;
 	}
 }

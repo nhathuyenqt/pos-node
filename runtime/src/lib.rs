@@ -12,7 +12,7 @@ pub mod constants;
 mod voter_bags;
 
 use codec::Decode;
-
+use std::collections::BTreeMap;
 use pallet_grandpa::AuthorityId as GrandpaId;
 use pallet_election_provider_multi_phase::SolutionAccuracyOf;
 use frame_election_provider_support::{
@@ -25,6 +25,7 @@ use sp_core::{crypto::KeyTypeId, OpaqueMetadata};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::{
+		Convert,
 		AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, NumberFor, One, Verify,
 		OpaqueKeys, Identity, 
 	},
@@ -36,6 +37,7 @@ use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
+
 
 use node_primitives::Moment;
 use constants::{currency::*, time::*};
@@ -592,8 +594,23 @@ impl pallet_assets::Config for Runtime {
 	type AssetIdParameter = codec::Compact<u32>;
 }
 
+
 parameter_types! {
 	pub const MinAuthorities: u32 = 2;
+	pub ValidatorAccounts: BTreeMap<u64, u64> = BTreeMap::new();
+}
+pub struct AccountIdToValidatorId;
+
+impl  AccountIdToValidatorId {
+	pub fn set(v: BTreeMap<u64, u64>) {
+		ValidatorAccounts::mutate(|m| *m = v);
+	}
+}
+
+impl Convert<u64, Option<u64>> for AccountIdToValidatorId {
+	fn convert(x: u64) -> Option<u64> {
+		ValidatorAccounts::get().get(&x).cloned()
+	}
 }
 
 impl pallet_template::Config for Runtime {
@@ -603,6 +620,7 @@ impl pallet_template::Config for Runtime {
 	type WeightInfo = ();
 	type XIndex = Assets;
 	type XIndexBalance = AssetBalance;
+	// type AccountIdToValidatorId = AccountIdToValidatorId;
 	// type CurrencyToAssetBalance = Identity;
 }
 

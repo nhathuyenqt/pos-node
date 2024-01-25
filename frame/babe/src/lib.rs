@@ -114,6 +114,8 @@ impl EpochChangeTrigger for SameAuthoritiesForever {
 	}
 }
 
+
+
 const UNDER_CONSTRUCTION_SEGMENT_LENGTH: u32 = 256;
 
 #[frame_support::pallet]
