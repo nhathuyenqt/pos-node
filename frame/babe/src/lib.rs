@@ -655,13 +655,18 @@ impl<T: Config> Pallet<T> {
 		Randomness::<T>::put(randomness);
 		let candidates = T::Committee::get_new_committee();
 
-		let custom_auth: Vec<(AuthorityId, BabeAuthorityWeight)> = vec![];
+		let mut custom_auth: Vec<(AuthorityId, BabeAuthorityWeight)> = vec![];
 
-		// for (acc, w) in candidates.into_iter(){
-		// 	// let acc_bytes = acc.into();
-		// 	let who: AuthorityId = sp_core::sr25519::Public::from_raw(acc).into();
-		// 	 custom_auth.push((who, w)); // TODO: convert acc to AuthorityId
-		// }
+		for (acc, w) in candidates.into_iter(){
+		
+			let account_vec = acc.encode();
+			// ensure!(account_vec.len() == 32, "AccountId must be 32 bytes.");
+			let mut bytes = [0u8; 32];
+			bytes.copy_from_slice(&account_vec);
+			// Ok(bytes)
+			let who: AuthorityId = sp_core::sr25519::Public::from_raw(bytes).into();
+			custom_auth.push((who, w)); // TODO: convert acc to AuthorityId
+		}
 
 
 		// Update the next epoch authorities.
