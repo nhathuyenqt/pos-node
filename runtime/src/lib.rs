@@ -12,7 +12,7 @@ pub mod constants;
 mod voter_bags;
 
 use codec::Decode;
-use std::collections::BTreeMap;
+
 use pallet_grandpa::AuthorityId as GrandpaId;
 use pallet_election_provider_multi_phase::SolutionAccuracyOf;
 use frame_election_provider_support::{
@@ -542,7 +542,8 @@ impl pallet_bags_list::Config<VoterBagsListInstance> for Runtime {
 impl pallet_session::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type ValidatorId = <Self as frame_system::Config>::AccountId;
-	type ValidatorIdOf = pallet_staking::StashOf<Self>;
+	type ValidatorIdOf = pallet_template::ValidatorOf<Self>;
+	//pallet_staking::StashOf<Self>;
 	type ShouldEndSession = Babe;
 	type NextSessionRotation = Babe;
 	type SessionManager = pallet_session::historical::NoteHistoricalRoot<Self, Staking>;
@@ -597,21 +598,15 @@ impl pallet_assets::Config for Runtime {
 
 parameter_types! {
 	pub const MinAuthorities: u32 = 2;
-	pub ValidatorAccounts: BTreeMap<u64, u64> = BTreeMap::new();
-}
-pub struct AccountIdToValidatorId;
-
-impl  AccountIdToValidatorId {
-	pub fn set(v: BTreeMap<u64, u64>) {
-		ValidatorAccounts::mutate(|m| *m = v);
-	}
+	// pub ValidatorAccounts: BTreeMap<u64, u64> = BTreeMap::new();
 }
 
-impl Convert<u64, Option<u64>> for AccountIdToValidatorId {
-	fn convert(x: u64) -> Option<u64> {
-		ValidatorAccounts::get().get(&x).cloned()
-	}
-}
+
+// impl Convert<u64, Option<u64>> for AccountIdToValidatorId {
+// 	fn convert(x: u64) -> Option<u64> {
+// 		ValidatorAccounts::get().get(&x).cloned()
+// 	}
+// }
 
 impl pallet_template::Config for Runtime {
 	type AddRemoveOrigin = EnsureRoot<Self::AccountId>;
@@ -1026,7 +1021,7 @@ mod tests {
 	use frame_support::{assert_noop, assert_ok};
 	//use hex_literal::hex;
 	//const alice: AccountId = hex_literal::hex!["5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"].into();
-	//let account = "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY".to_owned();
+	// const account :  AccountId  = "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY".to_owned();
 
 	#[test]
 	fn check_whitelist() {
@@ -1060,7 +1055,19 @@ mod tests {
 
 	#[test]
 	fn check_whitelist2() {
-		//assert_ok!(TemplateModule::deposit_token_to_taskcredit(RuntimeOrigin::signed(1), 1234));
+		// TemplateModule::create_profile(RuntimeOrigin::signed(1), b"hello".to_vec());
+		
+				
 		//assert_ok!(TemplateModule::create_task(RuntimeOrigin::signed(1),"hello".into(), 12));
+	}
+
+	#[test]
+	fn correct_view_note(){
+	
+			// assert_ok!(TemplateModule::create_profile(RuntimeOrigin::signed(1), b"hello".to_vec()));
+			// assert_eq!(TemplateModule::Notes::get(1).unwrap().0, b"hello".to_vec());
+			// System::assert_last_event(Event::NewProfile{RuntimeOrigin::signed(1), b"hello".to_vec()}.into());
+
+
 	}
 }

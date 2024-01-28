@@ -130,7 +130,7 @@ pub fn run() -> sc_cli::Result<()> {
 					BenchmarkCmd::Pallet(cmd) => {
 						if !cfg!(feature = "runtime-benchmarks") {
 							return Err(
-								"Runtime benchmarking wasn't enabled when building the node. \
+								"Runtime benchmarking wasnot enabled when building the node. \
 							You can enable it with `--features runtime-benchmarks`."
 									.into(),
 							)

@@ -135,4 +135,12 @@ try-runtime = [
 	"pallet-template/try-runtime",
 	"pallet-timestamp/try-runtime",
 	"pallet-transaction-payment/try-runtime",
+	"pallet-assets/try-runtime",
+	"pallet-staking/try-runtime",
+	"pallet-bags-list/try-runtime",
+	"pallet-election-provider-multi-phase/try-runtime",
+	"frame-executive/try-runtime",
+	"frame-try-runtime",
+	"frame-system/try-runtime",
+	"pallet-session/try-runtime",
 ]

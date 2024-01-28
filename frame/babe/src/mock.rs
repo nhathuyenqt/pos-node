@@ -56,6 +56,9 @@ frame_support::construct_runtime!(
 		Staking: pallet_staking,
 		Session: pallet_session,
 		Timestamp: pallet_timestamp,
+		TemplateModule: pallet_template,
+		Assets: pallet_assets,
+		// Balances: pallet_balances,
 	}
 );
 
@@ -210,6 +213,39 @@ impl pallet_offences::Config for Test {
 	type OnOffenceHandler = Staking;
 }
 
+type AssetBalance = Balance;
+impl pallet_assets::Config for Test {
+	type RuntimeEvent = RuntimeEvent;
+    type Balance = AssetBalance;
+    type AssetId = u32;
+    type Currency = Balances;
+    type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+    type AssetDeposit = ConstU128<1>;
+    type AssetAccountDeposit = ConstU128<10>;
+    type MetadataDepositBase = ConstU128<1>;
+    type MetadataDepositPerByte = ConstU128<1>;
+    type ApprovalDeposit = ConstU128<1>;
+    type StringLimit = ConstU32<50>;
+    type Freezer = ();
+    type Extra = ();
+    type WeightInfo = ();
+	type CallbackHandle = ();
+	type RemoveItemsLimit = ();
+	type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
+	type AssetIdParameter = codec::Compact<u32>;
+}
+
+impl pallet_template::Config for Test {
+	type AddRemoveOrigin = frame_support::EnsureRoot<Self::AccountId>;
+	type RuntimeEvent = RuntimeEvent;
+	type MinAuthorities = ConstU32<1>;
+	type WeightInfo = ();
+	type XIndex = Assets;
+	type XIndexBalance = AssetBalance;
+	// type AccountIdToValidatorId = AccountIdToValidatorId;
+	// type CurrencyToAssetBalance = Identity;
+}
+
 parameter_types! {
 	pub const EpochDuration: u64 = 3;
 	pub const ReportLongevity: u64 =
@@ -226,6 +262,8 @@ impl Config for Test {
 	type KeyOwnerProof = <Historical as KeyOwnerProofSystem<(KeyTypeId, AuthorityId)>>::Proof;
 	type EquivocationReportSystem =
 		super::EquivocationReportSystem<Self, Offences, Historical, ReportLongevity>;
+
+	type Committee = TemplateModule;
 }
 
 pub fn go_to_block(n: u64, s: u64) {
