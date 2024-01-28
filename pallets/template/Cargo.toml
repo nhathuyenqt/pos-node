@@ -40,7 +40,7 @@ sp-weights = { version = "20.0.0", default-features = false, git = "https://gith
 log = {  version = '0.4.14', default-features = false }
 #serde = {version="1.0.85", feature= ["derive"]}
 serde = { version = "1.0.119", default-features = false }
-
+frame-election-provider-support = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0"}
 
 # Common types
 node-primitives = { version = "2.0.0", default-features = false, path = "../../primitives" }
@@ -50,8 +50,7 @@ node-primitives = { version = "2.0.0", default-features = false, path = "../../p
 sp-core = { version = "21.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 sp-io = { version = "23.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 sp-runtime = { version = "24.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
-
-
+pallet-staking-reward-curve = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 [features]
 default = ["std"]
 std = [
@@ -77,7 +76,8 @@ std = [
 	"pallet-sudo/std",
 	"pallet-transaction-payment/std",
 	"sp-staking/std",
-	"sp-weights/std"
+	"sp-weights/std",
+	"frame-election-provider-support/std"
 ]
 
 runtime-benchmarks = ["frame-benchmarking/runtime-benchmarks"]

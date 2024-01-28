@@ -4535,6 +4535,7 @@ name = "pallet-template"
 version = "4.0.0-dev"
 dependencies = [
  "frame-benchmarking",
+ "frame-election-provider-support",
  "frame-support",
  "frame-system",
  "log",
@@ -4547,6 +4548,7 @@ dependencies = [
  "pallet-grandpa",
  "pallet-session",
  "pallet-staking",
+ "pallet-staking-reward-curve",
  "pallet-sudo",
  "pallet-timestamp",
  "pallet-transaction-payment",
