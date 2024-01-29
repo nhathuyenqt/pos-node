@@ -40,7 +40,7 @@ sp-weights = { version = "20.0.0", default-features = false, git = "https://gith
 log = {  version = '0.4.14', default-features = false }
 #serde = {version="1.0.85", feature= ["derive"]}
 serde = { version = "1.0.119", default-features = false }
-frame-election-provider-support = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0"}
+frame-election-provider-support = { version = "4.0.0-dev",  default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0"}
 
 # Common types
 node-primitives = { version = "2.0.0", default-features = false, path = "../../primitives" }
@@ -50,7 +50,9 @@ node-primitives = { version = "2.0.0", default-features = false, path = "../../p
 sp-core = { version = "21.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 sp-io = { version = "23.0.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 sp-runtime = { version = "24.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
+sp-state-machine = { version = "0.28.0", default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 pallet-staking-reward-curve = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
+sp-npos-elections = { version = "4.0.0-dev", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 [features]
 default = ["std"]
 std = [
@@ -58,6 +60,10 @@ std = [
 	"frame-benchmarking?/std",
 	"frame-support/std",
 	"frame-system/std",
+	"sp-core/std",
+    "sp-io/std",
+    "sp-std/std",
+    "sp-runtime/std",
     "rstd/std",
 	"scale-info/std",
     "pallet-session/std",
@@ -77,7 +83,8 @@ std = [
 	"pallet-transaction-payment/std",
 	"sp-staking/std",
 	"sp-weights/std",
-	"frame-election-provider-support/std"
+	"frame-election-provider-support/std",
+	"sp-npos-elections/std",
 ]
 
 runtime-benchmarks = ["frame-benchmarking/runtime-benchmarks"]
