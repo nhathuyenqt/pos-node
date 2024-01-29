@@ -39,7 +39,7 @@ sp-weights = { version = "20.0.0", default-features = false, git = "https://gith
 #sp-io = { version = "23.0.0", git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v1.0.0" }
 log = {  version = '0.4.14', default-features = false }
 #serde = {version="1.0.85", feature= ["derive"]}
-serde = { version = "1.0.119", default-features = false }
+serde = { version = "1.0.196", default-features = false }
 
 
 # Common types
