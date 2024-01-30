@@ -119,20 +119,20 @@ use super::*;
 
     #[pallet::storage]
     #[pallet::getter(fn approved_validators)]
-    pub type ApprovedValidators<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
+    pub type ApprovedValidators<T: Config> = StorageValue<_, Vec<T::ValidatorId>, ValueQuery>;
 
     #[pallet::storage]
     #[pallet::getter(fn validators_to_remove)]
-    pub type OfflineValidators<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
+    pub type OfflineValidators<T: Config> = StorageValue<_, Vec<T::ValidatorId>, ValueQuery>;
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// New validator addition initiated. Effective in ~2 sessions.
-		ValidatorAdditionInitiated(T::AccountId),
+		ValidatorAdditionInitiated(T::ValidatorId),
 
         /// Validator removal initiated. Effective in ~2 sessions.
-        ValidatorRemovalInitiated(T::AccountId),
+        ValidatorRemovalInitiated(T::ValidatorId),
 		NewProfile(T::AccountId, [u8; 16])
 	}
 
@@ -154,13 +154,13 @@ use super::*;
 	// #[derive(DefaultNoBound)]
 	pub struct GenesisConfig<T: Config> {
 		pub initial_validators: Vec<T::ValidatorId>,
-		pub initial_committee: Vec<T::AccountId>,
-	}
+		pub initial_members: Vec<T::AccountId>,
+		}
 
 	impl<T: Config> Default for GenesisConfig<T>{
 		fn default() -> Self{
 			Self{
-				initial_committee: Default::default(),
+				initial_members: Default::default(),
 				initial_validators: Default::default(),
 
 			}
@@ -275,7 +275,7 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
-	Adds offline validators to a local cache for removal on new session.
+	//Adds offline validators to a local cache for removal on new session.
 	fn mark_for_removal(validator_id: T::ValidatorId) {
         <OfflineValidators<T>>::mutate(|v| v.push(validator_id));
         log::debug!(target: LOG_TARGET, "Offline validator marked for auto removal.");
@@ -449,21 +449,21 @@ impl<T: Config> ValidatorSetWithIdentification<T::AccountId> for Pallet<T> {
 }
 
 // Offence reporting and unresponsiveness management.
-impl<T: Config, O: Offence<(T::AccountId, T::AccountId)>>
-ReportOffence<T::AccountId, (T::AccountId, T::AccountId), O> for Pallet<T>
+impl<T: Config, O: Offence<(T::ValidatorId, T::ValidatorId)>>
+ReportOffence<T::AccountId, (T::ValidatorId, T::ValidatorId), O> for Pallet<T>
 {
     fn report_offence(_reporters: Vec<T::AccountId>, offence: O) -> Result<(), OffenceError> {
         let offenders = offence.offenders();
 
-        for (v, _) in offenders.into_iter() {
-            Self::mark_for_removal(v);
-        }
+        // for (v, _) in offenders.into_iter() {
+        //     Self::mark_for_removal(v);
+        // }
 
         Ok(())
     }
 
     fn is_known_offence(
-        _offenders: &[(T::AccountId, T::AccountId)],
+        _offenders: &[(T::ValidatorId, T::ValidatorId)],
         _time_slot: &O::TimeSlot,
     ) -> bool {
         false

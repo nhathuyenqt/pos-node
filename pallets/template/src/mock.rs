@@ -473,7 +473,7 @@ pub fn new_test_ext(users: Vec<(u64, u64,u64)>) -> sp_io::TestExternalities {
 
 	let acc_balance = new_candidates.clone();
 	let balances: Vec<_> = (0..acc_balance.len()).map(|i| (i as u64, 10_000_000)).collect();
-	let members = balances.clone();
+	let members = vec![1, 2, 3, 4];
 	pallet_balances::GenesisConfig::<Test> { balances }
 		.assimilate_storage(&mut t)
 		.unwrap();
@@ -495,13 +495,13 @@ pub fn new_test_ext(users: Vec<(u64, u64,u64)>) -> sp_io::TestExternalities {
 	
 	let validators = members.clone().iter()
 	// .enumerate()
-		.map(|(i, _)| 
+		.map(|(i)| 
 				(*i))
 
 		.collect();
 
 	pallet_template::GenesisConfig::<Test> { 
-		initial_tasks: vec![],
+		// initial_notes: vec![],
 		initial_members: members,
 		initial_validators: validators,
 		}
