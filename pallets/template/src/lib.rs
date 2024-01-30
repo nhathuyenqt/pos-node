@@ -115,7 +115,7 @@ use super::*;
 
     #[pallet::storage]
     #[pallet::getter(fn validators)]
-    pub type Validators<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
+    pub type Validators<T: Config> = StorageValue<_, Vec<T::ValidatorId>, ValueQuery>;
 
     #[pallet::storage]
     #[pallet::getter(fn approved_validators)]
@@ -153,14 +153,16 @@ use super::*;
 	#[pallet::genesis_config]
 	// #[derive(DefaultNoBound)]
 	pub struct GenesisConfig<T: Config> {
-		// pub initial_validators: Vec<T::ValidatorId>,
+		pub initial_validators: Vec<T::ValidatorId>,
 		pub initial_committee: Vec<T::AccountId>,
 	}
 
 	impl<T: Config> Default for GenesisConfig<T>{
 		fn default() -> Self{
 			Self{
-				initial_committee: Default::default()
+				initial_committee: Default::default(),
+				initial_validators: Default::default(),
+
 			}
 		}
 	}
@@ -168,7 +170,7 @@ use super::*;
 	#[pallet::genesis_build]
 	impl<T: Config> BuildGenesisConfig for GenesisConfig<T> {
 		fn build(&self) {
-			// Pallet::<T>::initialize_validators(&self.initial_validators);
+			Pallet::<T>::initialize_validators(&self.initial_validators);
 		}
 	}
 
@@ -192,7 +194,7 @@ use super::*;
 		/// host runtime. Can also be set to sudo/root.
 		/*#[pallet::call_index(0)]
 		#[pallet::weight(0)]
-        pub fn add_validator(origin: OriginFor<T>, validator_id: T::AccountId) -> DispatchResult {
+        pub fn add_validator(origin: OriginFor<T>, validator_id: T::ValidatorId) -> DispatchResult {
             T::AddRemoveOrigin::ensure_origin(origin)?;
 
             Self::do_add_validator(validator_id.clone())?;
@@ -209,7 +211,7 @@ use super::*;
 		#[pallet::weight(<T as pallet::Config>::WeightInfo::remove_validator())]
 		pub fn remove_validator(
 			origin: OriginFor<T>,
-			validator_id: T::AccountId,
+			validator_id: T::ValidatorId,
 		) -> DispatchResult {
 			T::AddRemoveOrigin::ensure_origin(origin)?;
 
@@ -233,7 +235,7 @@ use super::*;
 }
 
 impl<T: Config> Pallet<T> {
-	fn initialize_validators(validators: &[T::AccountId]) {
+	fn initialize_validators(validators: &[T::ValidatorId]) {
 		assert!(
 			validators.len() as u32 >= T::MinAuthorities::get(),
 			"Initial set of validators must be at least T::MinAuthorities"
@@ -243,7 +245,7 @@ impl<T: Config> Pallet<T> {
 		<Validators<T>>::put(validators);
 	}
 
-	fn do_add_validator(validator_id: T::AccountId) -> DispatchResult {
+	fn do_add_validator(validator_id: T::ValidatorId) -> DispatchResult {
 		ensure!(!<Validators<T>>::get().contains(&validator_id), Error::<T>::Duplicate);
 		<Validators<T>>::mutate(|v| v.push(validator_id.clone()));
 
@@ -253,7 +255,7 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
-	fn do_remove_validator(validator_id: T::AccountId) -> DispatchResult {
+	fn do_remove_validator(validator_id: T::ValidatorId) -> DispatchResult {
 		let mut validators = <Validators<T>>::get();
 
 		// Ensuring that the post removal, target validator count doesn't go
@@ -273,8 +275,8 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
-	// Adds offline validators to a local cache for removal on new session.
-	fn mark_for_removal(validator_id: T::AccountId) {
+	Adds offline validators to a local cache for removal on new session.
+	fn mark_for_removal(validator_id: T::ValidatorId) {
         <OfflineValidators<T>>::mutate(|v| v.push(validator_id));
         log::debug!(target: LOG_TARGET, "Offline validator marked for auto removal.");
     }
@@ -296,7 +298,7 @@ impl<T: Config> Pallet<T> {
 		);
 
 		// Clear the offline validator list to avoid repeated deletion.
-		<OfflineValidators<T>>::put(Vec::<T::AccountId>::new());
+		<OfflineValidators<T>>::put(Vec::<T::ValidatorId>::new());
 	}
 
 

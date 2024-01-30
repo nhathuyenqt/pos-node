@@ -12,16 +12,13 @@ use frame_support::{
 	traits::{
 		ConstU128, ConstU32, ConstU64, ConstU8, KeyOwnerProofSystem, Randomness, StorageInfo, AsEnsureOriginWithArg
 	},
-	
-	weights::{
-		constants::{
-			BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_REF_TIME_PER_SECOND,
-		},
-		IdentityFee, Weight,
-	},
-	StorageValue,
+
+
 };
 
+use sp_consensus_babe::{
+	AllowedSlots, BabeEpochConfiguration, Slot, VrfSignature, RANDOMNESS_LENGTH,
+};
 
 use frame_system::{EnsureRoot,  EnsureSigned};
 use pallet_session::*;
@@ -206,7 +203,7 @@ impl pallet_session::SessionHandler<AccountId> for TestSessionHandler {
 // 	AUTHORITIES.with(|l| l.borrow().to_vec())
 // }
 
-pub fn new_test_ext() -> sp_io::TestExternalities {
+// pub fn new_test_ext() -> sp_io::TestExternalities {
 	// let mut t = frame_system::GenesisConfig::<Test>::default().build_storage().unwrap();
 	// let mut committee: Vec<u64> = vec![];
 	// let keys: Vec<_> = NEXT_VALIDATORS
@@ -228,8 +225,8 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 	// 	.assimilate_storage(&mut t)
 	// 	.unwrap();
 	// sp_io::TestExternalities::new(t)
-	frame_system::GenesisConfig::<Test>::default().build_storage().unwrap().into()
-}
+// 	frame_system::GenesisConfig::<Test>::default().build_storage().unwrap().into()
+// }
 
 parameter_types! {
 	pub const BlockHashCount: u64 = 250;
@@ -427,3 +424,89 @@ impl pallet_timestamp::Config for Test {
 // 	type KeyOwnerProof = sp_core::Void;
 // 	type EquivocationReportSystem = ();
 // }
+pub use sp_consensus_babe::AuthorityId;
+use codec::{Decode, Encode};
+
+// Build genesis storage according to the mock runtime.
+pub fn new_test_ext(users: Vec<(u64, u64,u64)>) -> sp_io::TestExternalities {
+
+	let mut t = frame_system::GenesisConfig::<Test>::default().build_storage().unwrap();
+	let init_test_authority = vec![(1, 7), (2, 9), (3, 100), (4, 59)];
+	let new_candidates = init_test_authority.clone();
+
+	let mut new_next_authority: Vec<(AuthorityId, u64)> = vec![];
+
+	// for (acc, w) in init_test_authority.into_iter(){
+	// 	let acc_vec = acc.encode();
+	// 	let mut bytes : [u8; 32] = [0u8; 32];
+	// 	bytes.copy_from_slice(&acc_vec);
+	// 	let who: AuthorityId = sp_core::sr25519::Public::from_raw(bytes).into();
+	// 	new_next_authority.push((who, w));
+	// }
+
+	let next_config = BabeEpochConfiguration {
+		c: (1, 4),
+		allowed_slots: sp_consensus_babe::AllowedSlots::PrimarySlots,
+	};
+
+	// let authority = acc.iter().map(|x| sp_core::sr25519::Public::from_raw(x).into()).collect();
+	// RuntimeGenesisConfig{
+	// 	balances: BalancesConfig{
+	// 		balances: users.iter().map(|(user,_, _)| (*user, 10)).collect()
+	// 	},
+	// 	babe: BabeConfig{
+	// 		authorities: new_next_authority,
+	// 		epoch_config: Some(BabeEpochConfiguration {
+	// 			c: (1, 4),
+	// 			allowed_slots: sp_consensus_babe::AllowedSlots::PrimarySlots,
+	// 		})
+	// 	}
+
+	// 	..Default::default()
+	// }
+	// .assimilate_storage(&mut t).unwrap();
+
+
+	// let mut ext = sp_io::TestExternalities::new(t);
+	// ext.execute_with(|| System::set_block_number(1));
+	// ext
+
+	let acc_balance = new_candidates.clone();
+	let balances: Vec<_> = (0..acc_balance.len()).map(|i| (i as u64, 10_000_000)).collect();
+	let members = balances.clone();
+	pallet_balances::GenesisConfig::<Test> { balances }
+		.assimilate_storage(&mut t)
+		.unwrap();
+
+	// stashes are the index.
+	let session_keys: Vec<_> = new_candidates
+		.iter()
+		// .enumerate()
+		.map(|(i, k)| 
+		 		(*i, *i,  MockSessionKeys { dummy: UintAuthorityId(*k).into() }))
+
+		.collect();
+
+	// NOTE: this will initialize the babe authorities
+	// through OneSessionHandler::on_genesis_session
+	pallet_session::GenesisConfig::<Test> { keys: session_keys }
+		.assimilate_storage(&mut t)
+		.unwrap();
+	
+	let validators = members.clone().iter()
+	// .enumerate()
+		.map(|(i, _)| 
+				(*i))
+
+		.collect();
+
+	pallet_template::GenesisConfig::<Test> { 
+		initial_tasks: vec![],
+		initial_members: members,
+		initial_validators: validators,
+		}
+		.assimilate_storage(&mut t)
+		.unwrap();
+	
+	t.into()
+}
