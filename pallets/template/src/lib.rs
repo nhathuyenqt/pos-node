@@ -383,8 +383,8 @@ impl<T: Config> pallet_session::SessionManager<T::ValidatorId> for Pallet<T> {
 		// log::debug!(target: LOG_TARGET, "New session called; updated validator set provided.");
 
 		// Some(Self::validators())
-		let x: Vec<(T::AccountId, u64)> = Self::committee();
-		let mut y: Vec<T::ValidatorId> = vec![];
+		// let x: Vec<(T::AccountId, u64)> = Self::committee();
+		// let mut y: Vec<T::ValidatorId> = vec![];
 
 		// for (account_id, w) in x.into_iter(){
 		// 	let a = ValidatorOf::<T>::convert(account_id).unwrap();
@@ -392,7 +392,8 @@ impl<T: Config> pallet_session::SessionManager<T::ValidatorId> for Pallet<T> {
 			
 		// }
 		
-		Some(y)
+		// Some(y)
+		Some(Self::validators())
 		
 	}
 

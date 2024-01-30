@@ -111,7 +111,7 @@ frame_support::construct_runtime!(
 		// Sudo: pallet_sudo,
 		// // staking related pallets
 		// ElectionProviderMultiPhase: pallet_election_provider_multi_phase,
-	//	Staking: pallet_staking,
+		// Staking: pallet_staking,
 		Assets: pallet_assets,
 		//VoterList: pallet_bags_list::<Instance1>,
 		// Historical: pallet_session::historical,
@@ -277,7 +277,7 @@ impl pallet_session::Config for Test {
 	type ValidatorIdOf = pallet_template::ValidatorOf<Self>;
 	type ShouldEndSession = Babe;
 	type NextSessionRotation = Babe;
-	type SessionManager = TemplateModule;
+	type SessionManager = TemplateModule; //pallet_session::historical::NoteHistoricalRoot<Self, Staking>;
 	type SessionHandler =  TestSessionHandler;//<MockSessionKeys as OpaqueKeys>::KeyTypeIdProviders;
 	type Keys = MockSessionKeys;
 	type WeightInfo = ();
@@ -414,6 +414,43 @@ impl pallet_timestamp::Config for Test {
 	type WeightInfo = ();
 }
 
+// impl pallet_staking::Config for Runtime {
+// 	type Currency = Balances;
+// 	type CurrencyBalance = Balance;
+// 	type UnixTime = Timestamp;
+// 	type MaxNominations = ConstU32<16>;
+// 	type CurrencyToVote = sp_staking::currency_to_vote::U128CurrencyToVote;
+// 	type RewardRemainder = (); // TODO Treasury
+// 	type RuntimeEvent = RuntimeEvent;
+// 	type Slash = (); // TODO Treasury send the slashed funds to the treasury.
+// 	type Reward = (); // rewards are minted from the void
+// 	type SessionsPerEra = SessionsPerEra;
+// 	type BondingDuration = BondingDuration;
+// 	type SlashDeferDuration = SlashDeferDuration;
+// 	/// TODO A super-majority of the council can cancel the slash.
+// 	// type AdminOrigin = EitherOfDiverse<
+// 	// 	EnsureRoot<AccountId>,
+// 	// 	pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3, 4>,
+// 	// >;
+// 	type AdminOrigin = EnsureRoot<AccountId>;
+// 	type SessionInterface = Self;
+// 	type EraPayout = pallet_staking::ConvertCurve<RewardCurve>;
+// 	type NextNewSession = Session; //call pallet_session
+// 	type MaxNominatorRewardedPerValidator = ConstU32<64>;
+// 	type OffendingValidatorsThreshold = OffendingValidatorsThreshold;
+// 	type ElectionProvider = ElectionProviderMultiPhase;
+// 	type GenesisElectionProvider = onchain::OnChainExecution<OnChainSeqPhragmen>;
+// 	type VoterList = VoterList;
+// 	// This a placeholder, to be introduced in the next PR as an instance of bags-list
+// 	type TargetList = pallet_staking::UseValidatorsMap<Self>;
+// 	type MaxUnlockingChunks = ConstU32<32>;
+// 	type HistoryDepth = ConstU32<84>;
+// 	// type OnStakerSlash = (); // NominationPools
+// 	type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
+// 	type BenchmarkingConfig = pallet_staking::TestBenchmarkingConfig;
+// 	type EventListeners = ();
+// }
+
 // impl pallet_grandpa::Config for Test {
 // 	type RuntimeEvent = RuntimeEvent;
 
@@ -431,7 +468,7 @@ use codec::{Decode, Encode};
 pub fn new_test_ext(users: Vec<(u64, u64,u64)>) -> sp_io::TestExternalities {
 
 	let mut t = frame_system::GenesisConfig::<Test>::default().build_storage().unwrap();
-	let init_test_authority = vec![(1, 7), (2, 9), (3, 100), (4, 59)];
+	let init_test_authority = vec![(1, 7), (2, 9), (3, 100)];
 	let new_candidates = init_test_authority.clone();
 
 	let mut new_next_authority: Vec<(AuthorityId, u64)> = vec![];
@@ -473,10 +510,24 @@ pub fn new_test_ext(users: Vec<(u64, u64,u64)>) -> sp_io::TestExternalities {
 
 	let acc_balance = new_candidates.clone();
 	let balances: Vec<_> = (0..acc_balance.len()).map(|i| (i as u64, 10_000_000)).collect();
-	let members = vec![1, 2, 3, 4];
+	let members = vec![1, 2, 3];
 	pallet_balances::GenesisConfig::<Test> { balances }
 		.assimilate_storage(&mut t)
 		.unwrap();
+
+		let keys: Vec<_> = NEXT_VALIDATORS
+		.with(|l| l.borrow().iter().cloned().map(|i| (i, i, UintAuthorityId(i).into())).collect());
+	
+	BasicExternalities::execute_with_storage(&mut t, || {
+		for (ref k, ..) in &keys {
+			frame_system::Pallet::<Test>::inc_providers(k);
+		}
+		frame_system::Pallet::<Test>::inc_providers(&4);
+		frame_system::Pallet::<Test>::inc_providers(&69);
+	});
+
+	// let validators = keys.iter().map(|x: &(u64, u64, _)| x.0).collect::<Vec<_>>();
+	
 
 	// stashes are the index.
 	let session_keys: Vec<_> = new_candidates
@@ -492,18 +543,16 @@ pub fn new_test_ext(users: Vec<(u64, u64,u64)>) -> sp_io::TestExternalities {
 	pallet_session::GenesisConfig::<Test> { keys: session_keys }
 		.assimilate_storage(&mut t)
 		.unwrap();
-	
-	let validators = members.clone().iter()
-	// .enumerate()
-		.map(|(i)| 
-				(*i))
 
-		.collect();
+
+	
+	
 
 	pallet_template::GenesisConfig::<Test> { 
 		// initial_notes: vec![],
 		initial_members: members,
-		initial_validators: validators,
+		initial_validators: keys.iter().map(|x| x.0).collect::<Vec<_>>(),
+		
 		}
 		.assimilate_storage(&mut t)
 		.unwrap();

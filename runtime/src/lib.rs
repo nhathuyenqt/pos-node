@@ -810,51 +810,6 @@ impl_runtime_apis! {
 		}
 	}
 
-// 	impl<T: Config> OneSessionHandler<T::AccountId> for Pallet<T>
-// where
-// 	T: pallet_session::Config,
-// {
-// 	type Key = AuthorityId;
-
-// 	fn on_genesis_session<'a, I: 'a>(validators: I)
-// 	where
-// 		I: Iterator<Item = (&'a T::AccountId, AuthorityId)>,
-// 	{
-// 		let authorities = validators.map(|(_, k)| (k, 1)).collect::<Vec<_>>();
-// 		Self::initialize_genesis_authorities(&authorities);
-// 	}
-
-// 	fn on_new_session<'a, I: 'a>(_changed: bool, validators: I, queued_validators: I)
-// 	where
-// 		I: Iterator<Item = (&'a T::AccountId, AuthorityId)>,
-// 	{
-// 		let authorities = validators.map(|(_account, k)| (k, 1)).collect::<Vec<_>>();
-// 		let bounded_authorities = WeakBoundedVec::<_, T::MaxAuthorities>::force_from(
-// 			authorities,
-// 			Some(
-// 				"Warning: The session has more validators than expected. \
-// 				A runtime configuration adjustment may be needed.",
-// 			),
-// 		);
-
-// 		let next_authorities = queued_validators.map(|(_account, k)| (k, 1)).collect::<Vec<_>>();
-// 		let next_bounded_authorities = WeakBoundedVec::<_, T::MaxAuthorities>::force_from(
-// 			next_authorities,
-// 			Some(
-// 				"Warning: The session has more queued validators than expected. \
-// 				A runtime configuration adjustment may be needed.",
-// 			),
-// 		);
-
-// 		let session_index = <pallet_session::Pallet<T>>::current_index();
-
-// 		Self::enact_epoch_change(bounded_authorities, next_bounded_authorities, Some(session_index))
-// 	}
-
-// 	fn on_disabled(i: u32) {
-// 		Self::deposit_consensus(ConsensusLog::OnDisabled(i))
-// 	}
-// }
 
 	impl sp_session::SessionKeys<Block> for Runtime {
 		fn generate_session_keys(seed: Option<Vec<u8>>) -> Vec<u8> {
